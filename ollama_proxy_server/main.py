@@ -171,6 +171,12 @@ def main():
                 finally:
                     que.get_nowait()
                     self.add_access_log_entry(event="gen_done",user=self.user, ip_address=client_ip, access="Authorized", server=min_queued_server[0], nb_queued_requests_on_server=que.qsize())                    
+            elif path == '/api/pull':
+                # Model pull requests should go to all servers
+                for server in servers:
+                    response = requests.request(self.command, server[1]['url'] + path, params=get_params, data=post_params)
+                    self._send_response(response)
+
             else:
                 # For other endpoints, just mirror the request.
                 response = requests.request(self.command, min_queued_server[1]['url'] + path, params=get_params, data=post_params)
